@@ -59,19 +59,20 @@ func InitValues() error {
 	_ = viper.BindEnv("VIP_CONTRACT")
 
 	values = &Values{
-		DbHost:     viper.GetString("DB_HOST"),
-		DbPort:     viper.GetUint("DB_PORT"),
-		DbUser:     viper.GetString("DB_USER"),
-		DbName:     viper.GetString("DB_NAME"),
-		DbPassword: viper.GetString("DB_PASSWORD"),
-		Keystore:   viper.GetString("KEYSTORE"),
-		Passphrase: viper.GetString("PASSPHARSE"),
-		Port:       viper.GetInt("PORT"),
-		GinMode:    viper.GetString("GIN_MODE"),
-		RPC:        viper.GetString("RPC"),
-		Contract:   viper.GetString("CONTRACT"),
-		MaxGas:     viper.GetString("MAX_GAS"),
-		VipMaxGas:  viper.GetString("VIP_MAX_GAS"),
+		DbHost:      viper.GetString("DB_HOST"),
+		DbPort:      viper.GetUint("DB_PORT"),
+		DbUser:      viper.GetString("DB_USER"),
+		DbName:      viper.GetString("DB_NAME"),
+		DbPassword:  viper.GetString("DB_PASSWORD"),
+		Keystore:    viper.GetString("KEYSTORE"),
+		Passphrase:  viper.GetString("PASSPHARSE"),
+		Port:        viper.GetInt("PORT"),
+		GinMode:     viper.GetString("GIN_MODE"),
+		RPC:         viper.GetString("RPC"),
+		Contract:    viper.GetString("CONTRACT"),
+		MaxGas:      viper.GetString("MAX_GAS"),
+		VipMaxGas:   viper.GetString("VIP_MAX_GAS"),
+		VipContract: viper.GetString("VIP_CONTRACT"),
 	}
 	return nil
 }

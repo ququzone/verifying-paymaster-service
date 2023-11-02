@@ -35,7 +35,7 @@ type Account struct {
 	gorm.Model
 	Address     string `gorm:"unique;type:varchar(42)"`
 	Enable      bool
-	VipID       int32  `gorm:"type:integer DEFAULT -1"`
+	VipID       int64  `gorm:"type:integer DEFAULT -1"`
 	RemainGas   string `gorm:"type:varchar(30)"`
 	UsedGas     string `gorm:"type:varchar(30)"`
 	LastRequest time.Time
@@ -44,6 +44,15 @@ type Account struct {
 func (a *Account) FindByAddress(rep db.Repository, address string) (*Account, error) {
 	var rec Account
 	err := rep.Model(&Account{}).First(&rec, `"address" = ?`, address).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	return &rec, nil
+}
+
+func (a *Account) FindByVipID(rep db.Repository, id int64) (*Account, error) {
+	var rec Account
+	err := rep.Model(&Account{}).Where(`"vip_id" = ?`, id).Order("last_request desc").First(&rec).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	}

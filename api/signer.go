@@ -52,13 +52,21 @@ type GasRemain struct {
 	Used        string `json:"total_used"`
 }
 
+type PaymasterConfig struct {
+	MaxGas      string `json:"max_gas"`
+	VipContract string `json:"vip_contract"`
+	MaxVipGas   string `json:"max_vip_gas"`
+}
+
 type Signer struct {
-	Container  container.Container
-	Client     *ethclient.Client
-	Contract   common.Address
-	Paymaster  *contracts.VerifyingPaymaster
-	PrivateKey *ecdsa.PrivateKey
-	MaxGas     *big.Int
+	Container   container.Container
+	Client      *ethclient.Client
+	Contract    common.Address
+	Paymaster   *contracts.VerifyingPaymaster
+	PrivateKey  *ecdsa.PrivateKey
+	MaxGas      *big.Int
+	MaxVipGas   *big.Int
+	VipContract *contracts.VipNFT
 }
 
 func NewSigner(con container.Container) (*Signer, error) {
@@ -84,16 +92,24 @@ func NewSigner(con container.Container) (*Signer, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	maxGas, _ := new(big.Int).SetString(conf.MaxGas, 10)
 
+	contract = common.HexToAddress(conf.VipContract)
+	vipContract, err := contracts.NewVipNFT(contract, rpc)
+	if err != nil {
+		return nil, err
+	}
+	maxVipGas, _ := new(big.Int).SetString(conf.VipMaxGas, 10)
+
 	return &Signer{
-		Container:  con,
-		Client:     rpc,
-		Contract:   contract,
-		Paymaster:  paymaster,
-		PrivateKey: keystore.PrivateKey,
-		MaxGas:     maxGas,
+		Container:   con,
+		Client:      rpc,
+		Contract:    contract,
+		Paymaster:   paymaster,
+		PrivateKey:  keystore.PrivateKey,
+		MaxGas:      maxGas,
+		VipContract: vipContract,
+		MaxVipGas:   maxVipGas,
 	}, nil
 }
 
@@ -230,11 +246,40 @@ func (s *Signer) Pm_gasRemain(addr string) (*GasRemain, error) {
 	}, nil
 }
 
+func (s *Signer) Pm_config() (*PaymasterConfig, error) {
+	return &PaymasterConfig{
+		MaxGas:      config.Config().MaxGas,
+		VipContract: config.Config().VipContract,
+		MaxVipGas:   config.Config().VipMaxGas,
+	}, nil
+}
+
 func (s *Signer) Pm_requestGas(addr string) (bool, error) {
 	account, err := (&models.Account{}).FindByAddress(s.Container.GetRepository(), strings.ToLower(addr))
 	if nil != err {
 		logger.S().Errorf("Query account error: %v", err)
 		return false, err
+	}
+	var lastVip int64 = -1
+	index, err := s.VipContract.TokenOfOwnerByIndex(nil, common.HexToAddress(addr), big.NewInt(0))
+	if err != nil {
+		// mute logs
+		// logger.S().Errorf("Query account vip nft error: %v", err)
+	} else {
+		lastVip = index.Int64()
+	}
+
+	gas := s.MaxGas
+	if lastVip != -1 {
+		last, err := (&models.Account{}).FindByVipID(s.Container.GetRepository(), lastVip)
+		if nil != err {
+			logger.S().Errorf("Query account by vip id error: %v", err)
+			return false, err
+		}
+		if last != nil && account.LastRequest.Unix()+86400 > time.Now().Unix() {
+			return false, errors.New("frequent requests with NFT")
+		}
+		gas = s.MaxVipGas
 	}
 	if account != nil {
 		if !account.Enable {
@@ -250,8 +295,10 @@ func (s *Signer) Pm_requestGas(addr string) (bool, error) {
 			UsedGas: "0",
 		}
 	}
-	account.RemainGas = s.MaxGas.String()
+
+	account.RemainGas = gas.String()
 	account.LastRequest = time.Now()
+	account.VipID = lastVip
 	err = s.Container.GetRepository().Save(account).Error
 	if nil != err {
 		logger.S().Errorf("save account error: %v", err)
