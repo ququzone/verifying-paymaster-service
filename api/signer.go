@@ -143,18 +143,19 @@ func (s *Signer) Pm_sponsorUserOperation(op map[string]any, entryPoint string, c
 	totalGas := new(big.Int).Add(preVerificationGas, verificationGas)
 	totalGas = new(big.Int).Add(totalGas, callGas)
 	totalGas = new(big.Int).Mul(totalGas, userOp.MaxFeePerGas)
-	if totalGas.Cmp(remainGas) > 0 {
-		if account.LastRequest.Unix()+86400 < time.Now().Unix() {
-			account.LastRequest = time.Now()
-			account.RemainGas = s.MaxGas.String()
-			err = s.Container.GetRepository().Save(account).Error
-			if nil != err {
-				logger.S().Errorf("save account error: %v", err)
-				return nil, err
-			}
-		}
-	}
-	remainGas, _ = new(big.Int).SetString(account.RemainGas, 10)
+	// Auto claim gas
+	// if totalGas.Cmp(remainGas) > 0 {
+	// 	if account.LastRequest.Unix()+86400 < time.Now().Unix() {
+	// 		account.LastRequest = time.Now()
+	// 		account.RemainGas = s.MaxGas.String()
+	// 		err = s.Container.GetRepository().Save(account).Error
+	// 		if nil != err {
+	// 			logger.S().Errorf("save account error: %v", err)
+	// 			return nil, err
+	// 		}
+	// 	}
+	// }
+	// remainGas, _ = new(big.Int).SetString(account.RemainGas, 10)
 	if totalGas.Cmp(remainGas) > 0 {
 		return nil, errors.New("insufficient gas")
 	}

@@ -17,19 +17,22 @@ type Values struct {
 	DbName     string
 	DbPassword string
 
-	Keystore   string
-	Passphrase string
-	Port       int
-	GinMode    string
-	RPC        string
-	Contract   string
-	MaxGas     string
+	Keystore    string
+	Passphrase  string
+	Port        int
+	GinMode     string
+	RPC         string
+	Contract    string
+	MaxGas      string
+	VipMaxGas   string
+	VipContract string
 }
 
 func InitValues() error {
 	viper.SetDefault("port", 8888)
 	viper.SetDefault("gin_mode", gin.ReleaseMode)
-	viper.SetDefault("MAX_GAS", "10000000000000000000")
+	viper.SetDefault("MAX_GAS", "2000000000000000000")
+	viper.SetDefault("VIP_MAX_GAS", "10000000000000000000")
 
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
@@ -52,6 +55,8 @@ func InitValues() error {
 	_ = viper.BindEnv("RPC")
 	_ = viper.BindEnv("CONTRACT")
 	_ = viper.BindEnv("MAX_GAS")
+	_ = viper.BindEnv("VIP_MAX_GAS")
+	_ = viper.BindEnv("VIP_CONTRACT")
 
 	values = &Values{
 		DbHost:     viper.GetString("DB_HOST"),
@@ -66,6 +71,7 @@ func InitValues() error {
 		RPC:        viper.GetString("RPC"),
 		Contract:   viper.GetString("CONTRACT"),
 		MaxGas:     viper.GetString("MAX_GAS"),
+		VipMaxGas:  viper.GetString("VIP_MAX_GAS"),
 	}
 	return nil
 }

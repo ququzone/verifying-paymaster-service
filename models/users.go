@@ -35,6 +35,7 @@ type Account struct {
 	gorm.Model
 	Address     string `gorm:"unique;type:varchar(42)"`
 	Enable      bool
+	VipID       int32  `gorm:"type:integer DEFAULT -1"`
 	RemainGas   string `gorm:"type:varchar(30)"`
 	UsedGas     string `gorm:"type:varchar(30)"`
 	LastRequest time.Time
