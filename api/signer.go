@@ -94,8 +94,7 @@ func NewSigner(con container.Container) (*Signer, error) {
 	}
 	maxGas, _ := new(big.Int).SetString(conf.MaxGas, 10)
 
-	contract = common.HexToAddress(conf.VipContract)
-	vipContract, err := contracts.NewVipNFT(contract, rpc)
+	vipContract, err := contracts.NewVipNFT(common.HexToAddress(conf.VipContract), rpc)
 	if err != nil {
 		return nil, err
 	}
@@ -128,18 +127,20 @@ func (s *Signer) Pm_sponsorUserOperation(op map[string]any, entryPoint string, c
 
 	account, err := (&models.Account{}).FindByAddress(s.Container.GetRepository(), strings.ToLower(userOp.Sender.String()))
 	if nil != err || account == nil {
-		account = &models.Account{
-			Address:     strings.ToLower(strings.ToLower(userOp.Sender.String())),
-			Enable:      true,
-			UsedGas:     "0",
-			RemainGas:   s.MaxGas.String(),
-			LastRequest: time.Now(),
-		}
-		err = s.Container.GetRepository().Save(account).Error
-		if nil != err {
-			logger.S().Errorf("save account error: %v", err)
-			return nil, err
-		}
+		return nil, errors.New("insufficient gas")
+		// remove auto claim gas
+		// account = &models.Account{
+		// 	Address:     strings.ToLower(strings.ToLower(userOp.Sender.String())),
+		// 	Enable:      true,
+		// 	UsedGas:     "0",
+		// 	RemainGas:   s.MaxGas.String(),
+		// 	LastRequest: time.Now(),
+		// }
+		// err = s.Container.GetRepository().Save(account).Error
+		// if nil != err {
+		// 	logger.S().Errorf("save account error: %v", err)
+		// 	return nil, err
+		// }
 	}
 
 	tempOp, _ := types.NewUserOperation(op)

@@ -28,7 +28,7 @@ curl -X POST http://localhost:8888/rpc/1234567890 -H "Content-Type:application/j
 curl -X POST http://localhost:8888/rpc/1234567890 -H "Content-Type:application/json" --data '{
     "jsonrpc":"2.0",
                 "method":"pm_requestGas",
-                "params":["0x27305a11f0028f9035572b76f79e3f15fde01079"],
+                "params":["0xeb0fAC424e85090e8e3fF82ebC51B95903760ecb"],
     "id":1
 }'
 ```
