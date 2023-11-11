@@ -51,7 +51,7 @@ func NewRepository() Repository {
 
 func connectDatabase() (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
-		"host=%s port=%d user=%s dbname=%s password=%s sslmode=disable",
+		"host=%s port=%d user=%s dbname=%s password=%s",
 		config.Config().DbHost,
 		config.Config().DbPort,
 		config.Config().DbUser,
