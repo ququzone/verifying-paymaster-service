@@ -2,16 +2,16 @@ package api
 
 import (
 	"crypto/ecdsa"
+	"encoding/hex"
 	"errors"
 	"math/big"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/ququzone/verifying-paymaster-service/config"
@@ -71,16 +71,15 @@ type Signer struct {
 
 func NewSigner(con container.Container) (*Signer, error) {
 	conf := config.Config()
-	keyData, err := os.ReadFile(conf.Keystore)
+	keyBytes, err := hex.DecodeString(conf.PrivateKey)
 	if err != nil {
 		return nil, err
 	}
-	keystore, err := keystore.DecryptKey(keyData, conf.Passphrase)
+	privKey, err := crypto.ToECDSA(keyBytes)
 	if err != nil {
 		return nil, err
 	}
 	logger.S().Infof("VerifyingPaymaster contract: %s", conf.Contract)
-	logger.S().Infof("VerifyingPaymaster signer: %s", keystore.Address.String())
 
 	rpc, err := ethclient.Dial(conf.RPC)
 	if err != nil {
@@ -105,7 +104,7 @@ func NewSigner(con container.Container) (*Signer, error) {
 		Client:      rpc,
 		Contract:    contract,
 		Paymaster:   paymaster,
-		PrivateKey:  keystore.PrivateKey,
+		PrivateKey:  privKey,
 		MaxGas:      maxGas,
 		VipContract: vipContract,
 		MaxVipGas:   maxVipGas,

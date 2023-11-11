@@ -17,8 +17,7 @@ type Values struct {
 	DbName     string
 	DbPassword string
 
-	Keystore    string
-	Passphrase  string
+	PrivateKey  string
 	Port        int
 	GinMode     string
 	RPC         string
@@ -50,8 +49,7 @@ func InitValues() error {
 	_ = viper.BindEnv("DB_PASSWORD")
 	_ = viper.BindEnv("PORT")
 	_ = viper.BindEnv("GIN_MODE")
-	_ = viper.BindEnv("KEYSTORE")
-	_ = viper.BindEnv("PASSPHARSE")
+	_ = viper.BindEnv("PRIVATE_KEY")
 	_ = viper.BindEnv("RPC")
 	_ = viper.BindEnv("CONTRACT")
 	_ = viper.BindEnv("MAX_GAS")
@@ -64,8 +62,7 @@ func InitValues() error {
 		DbUser:      viper.GetString("DB_USER"),
 		DbName:      viper.GetString("DB_NAME"),
 		DbPassword:  viper.GetString("DB_PASSWORD"),
-		Keystore:    viper.GetString("KEYSTORE"),
-		Passphrase:  viper.GetString("PASSPHARSE"),
+		PrivateKey:  viper.GetString("PRIVATE_KEY"),
 		Port:        viper.GetInt("PORT"),
 		GinMode:     viper.GetString("GIN_MODE"),
 		RPC:         viper.GetString("RPC"),
